@@ -1,11 +1,22 @@
-# Exam #N: "Exam Title"
-## Student: s123456 LASTNAME FIRSTNAME 
+# Exam #1: "Last Race"
+## Student: s349557 Roffinella Andrea 
 
 ## React Client Application Routes
 
 - Route `/`: page content and purpose
 - Route `/something/:param`: page content and purpose, param specification
 - ...
+- Route `/home`: welcome page presenting the game platform and the main parts of the website and their links:
+  - brief description.
+  - instructions page link.
+  - login button which displays a pop-up form.
+  - game page and ranking page links for registred users.
+- Route `/instructions`: contains the rules of the game. It is useful to make the game experience more easy and cover specific aspects to start as a new user.
+- Route `/logout`: used to delete the login session and avoid future automatic login.
+- Route `/page-not-found`: the content alerts about an unexpected URL, it is used to redirect any invalid URL.
+- Route `/game`: it contains the interactive network map. It is used to start a new game, interact with segments and compute the final score.
+- Route `/ranking`: it is dedicated to the best score of the platform games. Useful to introduce competition between different users.
+
 
 ## API Server
 
@@ -19,6 +30,15 @@
   - request parameters and request body content
   - response body content
 - ...
+- POST `/api/game`
+  - request body content {
+      'userId': ...,
+      '
+    }
+  - response body content { 
+      'stationDeparture': ...,
+      'stationDestination': ...
+    }
 
 ## Database Tables
 
