@@ -80,7 +80,7 @@
     ```
   - Status codes: `200 OK`, `401 Unauthorized`
   - Authentication required: true
-- GET `/api/map`
+- GET `/api/network`
   - no request body content and parameters
   - response body content 
     ```json 
