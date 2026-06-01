@@ -1,10 +1,10 @@
 import db from './db.js';
-import { Events } from './LastRaceModels.js';
+import { Event } from './LastRaceModels.js';
 
 export const getEvents = () => {
     return new Promise((resolve, reject) => {
         const query = 'SELECT * FROM events'
-        db.all(query, [], (err) => {
+        db.all(query, [], (err, rows) => {
             if (err) {
                 reject(err);
             } else {

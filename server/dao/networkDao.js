@@ -44,7 +44,7 @@ const getSegments = () => {
 }
 
 export async function getNetwork() {
-    const [lines, stations, segments] = await Promise.all([
+    const [lines, stations, segments] = await Promise.all([ // returns the first error if something goes wrong
         getLines(),
         getStations(),
         getSegments()

@@ -78,7 +78,7 @@
       ]
     }
     ```
-  - Status codes: `200 OK`, `401 Unauthorized`
+  - Status codes: `200 OK`, `401 Unauthorized`, `500 Internal Server Error`
   - Authentication required: true
 - GET `/api/network`
   - no request body content and parameters
@@ -114,6 +114,19 @@
     ``` 
   - Status codes: `200 OK`, `401 Unauthorized`
   - Authentication required: true
+- GET `/api/games/current`
+  - no request body content and parameters
+  - response body content 
+    ```json 
+    {
+      'gameId': ...,
+      'startStationId': ...,
+      'destinationStationId': ...,
+      'startTime': ...,
+    }
+    ```  
+  - Status codes: `200 OK`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error` 
+  - Authentication required: true
 - POST `/api/games`
   - no request body content and parameters
   - response body content 
@@ -122,31 +135,16 @@
       'gameId': ...,
       'startStationId': ...,
       'destinationStationId': ...,
-      'startTime': ...
-    }
-    ```  
-  - Status codes: `201 Created`, `401 Unauthorized` 
-  - Authentication required: true
-- GET `/api/games/:gameId`
-  - request parameter gameId
-  - response body content
-    ```json 
-    {
-      'gameId': ...,
-      'startStationId': ...,
-      'destinationStationId': ...,
       'startTime': ...,
-      'status': ...,
-      'score': ...
     }
     ```  
-  - Status codes: `200 OK`, `401 Unauthorized`, `Not Found`
+  - Status codes: `201 Created`, `401 Unauthorized`, `409 Conflict`, `500 Internal Server Error` 
   - Authentication required: true
-- POST `/api/games/:gameId/route`
+- POST `/api/games/route`
   - request body content 
     ```json 
     {
-      'route': [firstStationId, ..., lastStationId],
+      'route': [firstStopStationId, ..., secondLastStopStationId],
     }
     ```
   - response body content
@@ -189,9 +187,12 @@
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- Finn, password
+- Jake, password
+- BMO, password
 
 ## Use of AI Tools
 Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
 If you did not use any AI tools, simply state so.
+
+During development, I used ChatGPT mainly for debugging, resolving doubts, and getting feedback on my development ideas.

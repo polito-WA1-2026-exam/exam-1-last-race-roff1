@@ -8,13 +8,13 @@ export const getUser = (username, password) => {
         const sql = "SELECT * FROM users WHERE username = ?";
         db.get(sql, [username], (err, row) => {
             if (err) {
-                reject(err);
+                return reject(err);
             }
             else if (row === undefined) {
                 resolve(false);
             }
             else {
-                const user = { id: row.id, username: row.username };
+                const user = new User(row.id, row.username)
 
                 crypto.scrypt(password, row.salt, 16, function (err, hashedPassword) {
                     if (err) 

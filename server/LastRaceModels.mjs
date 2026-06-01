@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 function User(id, username, password = null){
     this.id = id
     this.username = username
@@ -8,7 +10,7 @@ function Game(id, startStationId, destinationStationId, startTime, status, score
     this.id = id
     this.startStationId = startStationId
     this.destinationStationId = destinationStationId
-    this.startTime = startTime
+    this.startTime = startTime && dayjs(startTime);
     this.status = status
     this.score = score
 }
