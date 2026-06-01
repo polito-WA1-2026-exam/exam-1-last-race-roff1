@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cors from "cors";
 import { check, validationResult } from 'express-validator';
 
-import { Game } from "./dao/LastRaceModels.js";
+import { Game } from "./LastRaceModels.mjs";
 
 import { getUser } from "./dao/userDao.js"
 import { getNetwork } from "./dao/networkDao.js"

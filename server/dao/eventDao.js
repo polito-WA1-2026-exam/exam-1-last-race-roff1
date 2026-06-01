@@ -1,5 +1,5 @@
-import db from './db.js';
-import { Event } from './LastRaceModels.js';
+import db from '../db.js';
+import { Event } from '../LastRaceModels.mjs';
 
 export const getEvents = () => {
     return new Promise((resolve, reject) => {

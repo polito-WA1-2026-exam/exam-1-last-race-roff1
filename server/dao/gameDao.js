@@ -1,5 +1,5 @@
-import db from './db.js';
-import { Game, RankingEntry } from './LastRaceModels.js';
+import db from '../db.js';
+import { Game, RankingEntry } from '../LastRaceModels.mjs';
 import dayjs from 'dayjs'
 
 export const createGame = (game) => {

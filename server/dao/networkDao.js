@@ -1,5 +1,5 @@
-import { Line, Station, Segment, Network } from './LastRaceModels.js';
-import db from './db.js';
+import { Line, Station, Segment, Network } from '../LastRaceModels.mjs';
+import db from '../db.js';
 
 const getLines = () => {
     return new Promise((resolve, reject) => {

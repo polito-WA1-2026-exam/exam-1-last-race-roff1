@@ -1,5 +1,5 @@
-import { User } from './LastRaceModels.js';
-import db from './db.js';
+import { User } from '../LastRaceModels.mjs';
+import db from '../db.js';
 import crypto from "crypto";
 
 
