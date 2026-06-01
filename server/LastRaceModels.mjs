@@ -6,8 +6,9 @@ function User(id, username, password = null){
     this.password = password
 }
 
-function Game(id, startStationId, destinationStationId, startTime, status, score = null){
+function Game(id, userId, startStationId, destinationStationId, startTime, status, score = null){
     this.id = id
+    this.userId = userId
     this.startStationId = startStationId
     this.destinationStationId = destinationStationId
     this.startTime = startTime && dayjs(startTime);
@@ -47,8 +48,8 @@ function Event(id, description, effect){
     this.effect = effect
 }
 
-function RankingEntry(userId, bestScore){
-    this.userId = userId
+function RankingEntry(username, bestScore){
+    this.username = username
     this.bestScore = bestScore
 }
 

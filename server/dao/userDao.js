@@ -18,7 +18,7 @@ export const getUser = (username, password) => {
 
                 crypto.scrypt(password, row.salt, 16, function (err, hashedPassword) {
                     if (err) 
-                        reject(err);
+                        return reject(err);
                     if (!crypto.timingSafeEqual(Buffer.from(row.hashedPassword, "hex"), hashedPassword))
                         resolve(false);
                     else

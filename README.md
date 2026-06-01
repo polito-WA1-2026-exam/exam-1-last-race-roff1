@@ -47,7 +47,11 @@
       'username': ..
     }
     ```
-  - Status codes: `200 OK`, `401 Unauthorized`, `500 Internal Server Error`
+  - Status codes: `201 Created`, `401 Unauthorized`, `422 Unprocessable Entity`, `500 Internal Server Error`
+  - Authentication required: false
+- DELETE `/api/sessions/current`
+  - no request/response body content and parameters
+  - Status codes: `200 OK`
   - Authentication required: false
 - GET `/api/sessions/current`
   - no request body content and parameters
@@ -60,10 +64,6 @@
     ```
   - Status codes: `200 OK`, `401 Unauthorized`
   - Authentication required: true
-- DELETE `/api/sessions/current`
-  - no request/response body content and parameters
-  - Status codes: `200 OK`
-  - Authentication required: false
 - GET `/api/ranking`
   - no request body content and parameters
   - response body content 
@@ -119,10 +119,9 @@
   - response body content 
     ```json 
     {
-      'gameId': ...,
       'startStationId': ...,
       'destinationStationId': ...,
-      'startTime': ...,
+      'startTime': ...
     }
     ```  
   - Status codes: `200 OK`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error` 
@@ -132,7 +131,6 @@
   - response body content 
     ```json 
     {
-      'gameId': ...,
       'startStationId': ...,
       'destinationStationId': ...,
       'startTime': ...,
@@ -150,8 +148,6 @@
   - response body content
     ```json
     {
-      'gameId': ..,
-      'userId': ..,
       'events': [{
         'description': ..,
         'effect': ..
@@ -160,7 +156,7 @@
       'status': ..
     }
     ```
-  - Status codes: `200 OK`, `400 Bad Request` for invalid route, `401 Unauthorized`, `404 Not Found`, `409 Conflict` for a game that has already finished
+  - Status codes: `200 OK`, `400 Bad Request` for invalid route, `401 Unauthorized`, `404 Not Found`, `409 Conflict` for a game that has already finished, `500 Internal Server Error`
   - Authentication required: true
 
 
