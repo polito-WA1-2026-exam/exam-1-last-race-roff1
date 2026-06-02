@@ -11,7 +11,7 @@ function Game(id, userId, startStationId, destinationStationId, startTime, statu
     this.userId = userId
     this.startStationId = startStationId
     this.destinationStationId = destinationStationId
-    this.startTime = startTime && dayjs(startTime);
+    this.startTime = startTime && dayjs(startTime)
     this.status = status
     this.score = score
 }
@@ -29,10 +29,9 @@ function Station(id, name, positionX, positionY){
     this.positionY = positionY
 }
 
-function Segment(id, stationA, stationB, lineId){
+function Segment(id, firstStationId, secondStationId, lineId){
     this.id = id
-    this.stationA = stationA
-    this.stationB = stationB
+    this.stationIds = [firstStationId, secondStationId]
     this.lineId = lineId
 }
 

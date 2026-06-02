@@ -36,7 +36,7 @@ const getSegments = () => {
             if (err) {
                 reject(err);
             } else {
-                const segments = rows.map(s => new Segment(s.id, s.stationA, s.stationB, s.lineId))
+                const segments = rows.map(s => new Segment(s.id, s.firstStationId, s.secondStationId, s.lineId))
                 resolve(segments)
             }
         })

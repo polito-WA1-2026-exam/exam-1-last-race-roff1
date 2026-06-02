@@ -8,6 +8,7 @@ export const getEvents = () => {
             if (err) {
                 reject(err);
             } else {
+                console.log(rows)
                 const events = rows.map(e => new Event(e.id, e.description, e.effect))
                 resolve(events)
             }              

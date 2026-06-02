@@ -1,0 +1,149 @@
+
+# wrong login request
+POST http://localhost:3001/api/sessions
+content-type: application/json
+
+{
+  "username": "Fake",
+  "password": "password" 
+}
+
+###
+
+# login request
+POST http://localhost:3001/api/sessions
+content-type: application/json
+
+{
+  "username": "Finn",
+  "password": "password1" 
+}
+
+###
+
+# logout
+DELETE http://localhost:3001/api/sessions/current
+
+###
+
+# ask for current session (no logout)
+GET http://localhost:3001/api/sessions/current
+
+###
+
+# ranking (no login)
+GET http://localhost:3001/api/ranking
+
+###
+
+# network (no login)
+GET http://localhost:3001/api/network
+
+###
+
+# ask for an active game (no login)
+GET http://localhost:3001/api/games/current
+
+###
+
+# start a new game (no login)
+POST http://localhost:3001/api/games
+
+###
+
+# end current game with a route (no login)
+POST http://localhost:3001/api/games/route
+content-type: application/json
+
+{
+  "route": [1, 2, 3, 4]
+}
+
+###
+
+# login request
+POST http://localhost:3001/api/sessions
+content-type: application/json
+
+{
+  "username": "Finn",
+  "password": "password1" 
+}
+
+###
+
+# ask for current session (with login)
+GET http://localhost:3001/api/sessions/current
+
+###
+
+# network (with login)
+GET http://localhost:3001/api/network
+
+###
+
+# ranking (with login)
+GET http://localhost:3001/api/ranking
+
+###
+
+# ask for an active game (with login but no active game)
+GET http://localhost:3001/api/games/current
+
+###
+
+# end current game with a route (with login but no active game)
+POST http://localhost:3001/api/games/route
+content-type: application/json
+
+{
+  "route": [1, 2, 3]
+}
+
+###
+
+# start a new game (with login and active game > check if start and dest. have at least 3 stops in between)
+POST http://localhost:3001/api/games
+
+###
+
+# test validation on invalid routes (string inside route, invalid segments, duplicates)
+POST http://localhost:3001/api/games/route
+content-type: application/json
+
+{
+  "route": [3, 4, 2, 1]
+}
+
+###
+
+# test time constraint
+POST http://localhost:3001/api/games
+
+###
+
+# > wait 90s
+POST http://localhost:3001/api/games/route
+content-type: application-application/json
+
+{
+  "route": [1, 2, 4, 8]
+}
+
+# test events and score computation
+POST http://localhost:3001/api/games
+
+###
+
+# > use a valid route
+POST http://localhost:3001/api/games/route
+content-type: application-application/json
+
+{
+  "route": []
+}
+
+###
+
+# check ranking results
+GET http://localhost:3001/api/ranking

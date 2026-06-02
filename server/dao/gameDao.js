@@ -11,7 +11,7 @@ export const createGame = (game) => {
         if ( !game.userId || !game.startStationId || !game.destinationStationId || !game.status || !game.startTime || !dayjs(game.startTime).isValid() )
             return reject(new Error("Missing/wrong required fields"));
 
-        db.run(sql, [game.userId, game.startStationId, game.destinationStationId, dayjs(game.startTime).toISOString(), game.status], function (err) {
+        db.run(sql, [game.userId, game.startStationId, game.destinationStationId, dayjs(game.startTime).format('YYYY-MM-DD HH:mm:ss'), game.status], function (err) {
             if (err)
                 reject(err)
             else
@@ -35,7 +35,7 @@ export const endGame = (id, score) => {
 
 export const getActiveGame = (userId) => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM games WHERE userId = ? AND status = 'active' AND startTime >= datetime('now', '-90 seconds') LIMIT 1`
+        const query = `SELECT * FROM games WHERE userId = ? AND status = 'active' AND startTime > datetime('now', 'localtime', '-90 seconds') ORDER BY startTime DESC LIMIT 1`
         db.get(query, [userId], (err, row) => {
             if(err)
                 reject(err)
@@ -43,17 +43,17 @@ export const getActiveGame = (userId) => {
                 if(!row)
                     resolve(null)
                 else
-                    resolve(new Game(row.id, row.startStationId, row.destinationStationId, row.startTime, row.status, row.score))
+                    resolve(new Game(row.id, row.userId, row.startStationId, row.destinationStationId, row.startTime, row.status, row.score))
             }
 
         })
     })
 }
 
-export const closeExpiredGames = () => {
+export const closeExpiredGames = (userId) => {
     return new Promise((resolve, reject) => {
-        const sql = `UPDATE games SET status = 'expired' WHERE status = 'active' AND startTime < datetime('now', '-90 seconds')`
-        db.run(sql, [], function (err) {
+        const sql = `UPDATE games SET status = 'expired' WHERE status = 'active' AND startTime < datetime('now', 'localtime', '-90 seconds') AND userId = ?`
+        db.run(sql, [userId], function (err) {
             if(err) 
                 reject(err);
             else

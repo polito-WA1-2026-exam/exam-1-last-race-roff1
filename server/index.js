@@ -11,7 +11,7 @@ import { getNetwork } from "./dao/networkDao.js"
 import { createGame, endGame, getActiveGame, closeExpiredGames, getRanking } from "./dao/gameDao.js"
 import { getEvents } from "./dao/eventDao.js"
 
-import { buildGraph, bfsDistances, setupGameStations, validateRoute } from "./services/graphService.js"
+import { buildGraph, findRandomNodesAtMinDistance, validatePath } from "./utils/graph.js"
 
 import dayjs from 'dayjs'
 import passport from 'passport';
@@ -40,7 +40,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
   if (!user)  // If login fails: passport blocks the route, response with error 401 Unauthorized + header message
     return cb(null, false, "Wrong username or password."); // error message in the WWW-Authenticated header of the response
 
-  return cb(null, {id: user.id, username: user.username});
+  return cb(null, { id: user.id, username: user.username });
 }));
 
 passport.serializeUser(function (user, cb) {
@@ -76,37 +76,48 @@ const onValidationErrors = (validationResult, res) => {
 };
 
 
-const checkRouteDuplicate = (route) => {
-  const set = new Set(route);
-  if (set.size !== route.length)
-    throw new Error('Route cannot contain duplicate stations');
-  return true;
-}
-
-const checkRouteValidStationIds = (route, { req }) => {
-  const stationIds = req.app.get('network').stations.map(s => s.id);
-  for(const routeStationId of route)
-    if(!stationIds.includes(routeStationId))
-      throw new Error(`Station ${routeStationId} does not exist`)
-  return true
-}
-
 const routeValidation = [
-  check('route').isArray({ min: 3 }).withMessage('Route must be a non-empty array'),
-  check('route.*').toInt().isInt().withMessage('Route must be an array containing only integer station IDs'),
-  check('route').custom(route => checkRouteDuplicate(route)),
-  check('route').custom(checkRouteValidStationIds)
-]
+  check('route')
+    .isArray({ min: 4 })
+    .withMessage('Route must be an array with at least 4 elements ')
+    .bail() // stop is any previous validation fails
+    .custom(route => {
+      if (!Array.isArray(route) || !route.every(Number.isInteger))
+        throw new Error('Route must be an array of integers')
+      return true;
+    })
+    .bail()
+    .custom((route, { req }) => { // check stations existance
+      const network = req.app.get('network');
+      const stationIds = new Set(network.stations.map(s => s.id));
+      for (const id of route)
+        if (!stationIds.has(id))
+          throw new Error(`Station ${id} does not exist`);
+      return true;
+    })
+    .bail()
+    .custom((route) => { // check segment duplicates
+      const segments = [];
+      for (let i=0; i<route.length-1; i++) 
+        segments.push(`${route[i]}-${route[i+1]}`);
+      if (new Set(segments).size !== segments.length)
+        throw new Error('Route cannot contain duplicate segments');
+      return true;
+    })
+    .bail()
+    .custom((route, { req }) => { // check segments existance
+      const graph = req.app.get('graph');
+      if (!validatePath(route, graph))
+        throw new Error('Invalid route segments');
+      return true;
+    })
+];
+
 
 const userValidation = [
   check('username').trim().isString().notEmpty().withMessage("Username must be a non-empty string"),
   check('password').isString().notEmpty().withMessage("Password must be a non-empty string")
 ]
-
-
-// network graph initialization
-let graph = null
-let network = null
 
 
 // publis APIs
@@ -121,7 +132,7 @@ app.post(
     next();
   },
   passport.authenticate("local"), // if valid credentials, passport.authenticate("local") middleware creates the session and attaches req.user (session deserialization)
-  (req, res) => res.status(201).json({id: req.user.id, username: req.user.username})
+  (req, res) => res.status(201).json({ id: req.user.id, username: req.user.username })
 );
 
 app.delete('/api/sessions/current', async (req, res) => {
@@ -134,7 +145,7 @@ app.delete('/api/sessions/current', async (req, res) => {
 app.use(isLoggedIn)
 
 app.get('/api/sessions/current', async (req, res) => {
-  res.json({id: req.user.id, username: req.user.username});
+  res.json({ id: req.user.id, username: req.user.username });
 })
 
 app.get('/api/ranking', async (req, res) => {
@@ -144,22 +155,27 @@ app.get('/api/ranking', async (req, res) => {
 })
 
 app.get('/api/network', async (req, res) => {
-  res.json(network)
+  res.json(app.get('network'))
 })
 
 app.get('/api/games/current', async (req, res) => {
-  await closeExpiredGames();
+  await closeExpiredGames(req.user.id);
 
   const activeGame = await getActiveGame(req.user.id);
+
+  console.log(activeGame)
+  console.log(dayjs().format('YYYY-MM-DD HH:mm:ss'))
+
   if (!activeGame)
     return res.status(404).json({ error: 'No active game found.' });
 
-  res.json({ startStationId: activeGame.startStationId, destinationStationId: activeGame.destinationStationId, startTime: activeGame.startTime});
+  res.json({ startStationId: activeGame.startStationId, destinationStationId: activeGame.destinationStationId, startTime: activeGame.startTime.format('YYYY-MM-DD HH:mm:ss') });
 })
 
 app.post('/api/games', async (req, res) => {
+
   try {
-    await closeExpiredGames();
+    await closeExpiredGames(req.user.id);
 
     const activeGame = await getActiveGame(req.user.id);
     if (activeGame)
@@ -168,12 +184,12 @@ app.post('/api/games', async (req, res) => {
     const {
       start: startStationId,
       destination: destinationStationId
-    } = setupGameStations(network, graph);
+    } = findRandomNodesAtMinDistance(req.app.get('graph'), 3);
 
     const newGame = new Game(null, req.user.id, startStationId, destinationStationId, dayjs().toISOString(), 'active')
 
     const result = await createGame(newGame);
-    res.status(201).json({ startStationId: result.startStationId, destinationStationId: result.destinationStationId, startTime: result.startTime});
+    res.status(201).json({ startStationId: result.startStationId, destinationStationId: result.destinationStationId, startTime: result.startTime.format('YYYY-MM-DD HH:mm:ss') });
 
   } catch (err) {
     return res.status(500).json({ err: err.message });
@@ -181,39 +197,34 @@ app.post('/api/games', async (req, res) => {
 
 })
 
-app.post('/api/games/route', routeValidation, async (req, res) => {
-  const invalidFields = validationResult(req);
+app.post('/api/games/route', routeValidation,  async (req, res) => {
 
-  if (!invalidFields.isEmpty())
-      return onValidationErrors(invalidFields, res);
+  const invalidFields = validationResult(req);
+  const route = req.body.route
 
   try {
-    await closeExpiredGames();
 
+    const expiredCount = await closeExpiredGames(req.user.id);
     const game = await getActiveGame(req.user.id);
-    if (!game)
-      return res.status(404).json({ error: "No active game." });
-    if (game.status !== "active") // defense from race conditions (like 2 user requests affecting the same game)
-      return res.status(409).json({ error: "Game already completed." });
-
-    const now = dayjs();
-    const start = dayjs(game.startTime);
-    if (now.diff(start, "second") > 90) {
-      await endGame(game.id, 0);
-      return res.status(409).json({ error: "Time expired. Game over." });
+    if (!game){
+      if(expiredCount === 0)
+        return res.status(404).json({ error: "No active game found." });
+      else
+        return res.status(404).json({ error: "No active game found (it may be expired due to time limit: 90 seconds)." });
     }
 
-    const route = [game.startStationId, ...req.body.route, game.destinationStationId]
-    const isValid = validateRoute(route, graph);
-    if (!isValid) {
+    // validation errors + check start and destination stations
+    if (!invalidFields.isEmpty()){
       await endGame(game.id, 0);
-      return res.status(400).json({ error: "Invalid route" });
+      return onValidationErrors(invalidFields, res);
     }
+    if (game.startStationId !== route[0] || game.destinationStationId !== route[route.length -1])
+      return res.status(422).json({ error: "Route start and destination do not match the assigned game stations." });
 
+    // score computation + events generation
     const events = await getEvents();
     let score = 20;
     const appliedEvents = [];
-
     for (let i = 0; i < route.length - 1; i++) {
       const event = events[Math.floor(Math.random() * events.length)];
       score += event.effect;
@@ -221,7 +232,9 @@ app.post('/api/games/route', routeValidation, async (req, res) => {
     }
 
     const finalScore = Math.max(0, score);
-    await endGame(game.id, finalScore);
+    const endCount = await endGame(game.id, finalScore);
+    if(endCount === 0)
+      return res.status(409).json({ error: "Game cannot be updated because it has already been completed or expired."});
     return res.status(200).json({ events: appliedEvents, score: finalScore, status: "completed" });
 
   } catch (err) {
@@ -234,15 +247,30 @@ app.post('/api/games/route', routeValidation, async (req, res) => {
 
 async function initApp() {
   try {
-    network = await getNetwork();
-    graph = buildGraph(network);
+    const network = await getNetwork();
+
+    if (!network?.stations?.length)
+      throw new Error("Database not seeded: no stations found");
+    
+    if (!network?.segments?.length)
+      throw new Error("Database not seeded: no segments found");
+    
+
+    const graph = buildGraph(network.stations.map(s => s.id), network.segments.map(s => s.stationIds));
+
+    if (!graph || graph.size === 0)
+      throw new Error("Graph initialization failed");
+
+    // set as global variables
+    app.set('network', network);
+    app.set('graph', graph);
 
     app.listen(port, () => {
       console.log(`Server listening at http://localhost:${port}`);
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Startup error:", err.message);
     process.exit(1);
   }
 }

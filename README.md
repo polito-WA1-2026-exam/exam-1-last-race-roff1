@@ -142,7 +142,7 @@
   - request body content 
     ```json 
     {
-      'route': [firstStopStationId, ..., secondLastStopStationId],
+      'route': [firstStationId, ..., lastStationId],
     }
     ```
   - response body content
@@ -183,9 +183,9 @@
 
 ## Users Credentials
 
-- Finn, password
-- Jake, password
-- BMO, password
+- Finn, password1
+- Jake, password2
+- BMO, password3
 
 ## Use of AI Tools
 Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
