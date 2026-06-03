@@ -47,7 +47,7 @@
       'username': ..
     }
     ```
-  - Status codes: `201 Created`, `401 Unauthorized`, `422 Unprocessable Entity`, `500 Internal Server Error`
+  - Status codes: `201 Created`, `422 Unprocessable Entity`, `500 Internal Server Error`
   - Authentication required: false
 - DELETE `/api/sessions/current`
   - no request/response body content and parameters
@@ -165,7 +165,7 @@
 - Table `users` - id, username, hashedPassword, salt
 - Table `stations` - id, name, positionX, positionY
 - Table `lines` - id, name, color
-- Table `segments` - id, stationA, stationB, lineId
+- Table `segments` - id, firstStationId, secondStationId, lineId
 - Table `events` - id, description, effect
 - Table `games` - id, userId, startStationId, destinationStationId, startTime, score, status
 
