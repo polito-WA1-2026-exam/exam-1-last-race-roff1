@@ -15,7 +15,7 @@ POST http://localhost:3001/api/sessions
 content-type: application/json
 
 {
-  "username": "Finn",
+  "username": "Finnn",
   "password": "password1" 
 }
 

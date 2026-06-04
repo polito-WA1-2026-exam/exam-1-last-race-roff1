@@ -1,49 +1,43 @@
 import UserContext from "../contexts/UserContext.js"
 
 import { useContext } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+
+import { Container, Row, Col, Button } from 'react-bootstrap';
+
+import { Logo } from './Logo.jsx'
+import { Link } from 'react-router'
 
 function Header(props) {
 
-
     return (
-        <Container fluid>
+        <Container fluid className='header p-4 '>
             <Row>
-                <Col>
+                <Col xs={5}></Col>
+                <Col xs={2}>
+                    <Link to="/"><Logo /></Link>
                 </Col>
-                <Col>
-                    <Logo />
-                </Col>
-                <Col>
-                    <UserArea />
+                <Col xs={5} className='d-flex justify-content-end align-items-center'>
+                    <UserArea showLoginModal={props.showLoginModal} />
                 </Col>
             </Row>
         </Container>
     )
 }
 
-function Logo() {
-    return (
-        <div className='logo'>
-            <img src="images/logo.png" alt="logo" />
-        </div>
-    );
-}
-
 function UserArea(props) {
     const user = useContext(UserContext)
 
     return (
-        <div className="header-right">
+        <div>
             {user.id !== undefined ? (
                 <>
                     <span>Welcome {user.username}</span>
-                    <button onClick={onLogout}>Logout</button>
+                    <Button onClick={onLogout} className='logout-btn'>Logout</Button>
                 </>
             ) : (
-                <button onClick={()=>console.log('TODO')}>
+                <Button onClick={props.showLoginModal} title='Login' className='login-btn'>
                     <i className="bi bi-person-circle"></i>
-                </button>
+                </Button>
             )}
         </div>
     );

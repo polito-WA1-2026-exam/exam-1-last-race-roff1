@@ -1,4 +1,251 @@
 /* <<< BASE LAYOUT >>> */ 
-.sidebar {
+#root {
+  border-right: 5px solid #0F0C59;
+  border-left: 5px solid #0F0C59;
+}
+
+.header {
   background-color: #F2B807;
 }
+
+.header {
+  position: sticky;
+  top: 0;
+  height: 18vh;
+  border-top: 5px solid #0F0C59;
+  z-index: 50;
+}
+
+.header .logo img {
+  height: 70px;
+}
+
+.logout-btn {
+  background-color: #0F0C59;
+  border-radius: 5px;
+}
+
+.login-btn {
+  background-color: #0F0C59 !important;
+  border-radius: 100% !important;
+  border: none !important;
+  transition: color 0.3s ease
+}
+
+.login-btn i {
+  color: #F2B807;
+  font-size: 20px;
+}
+
+.login-btn:hover {
+  background-color: #F20707 !important;
+}
+
+.nav-rail {
+  position: fixed;
+  top: 18vh;
+}
+
+.sidebar {
+  display: flex;
+  justify-content: center;
+  background-color: white;
+}
+
+.nav-rail div {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-rail i {
+  font-size: 20px;
+  color: #0F0C59 !important;
+  display: inline-block;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.nav-rail button{
+  background-color: white !important;
+  border: none !important;
+}
+
+.nav-rail i:hover {
+  transform: scale(1.1);
+  color: #F20707 !important;
+}
+
+.central-ctn {
+  min-height: 52vh;
+  display: flex;
+  justify-content: center;
+  background-color: #ffffffa3;
+  border-left: 1px solid #0f0c590f;
+  border-right: 1px solid #0f0c590f;
+  position: relative;
+}
+
+.central-ctn::before {
+  height: 100%;
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: url("images/background.jpg");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+
+  opacity: 0.2;
+  z-index: -1;
+}
+
+.page-ctn {
+  margin: 50px;
+  border: 3px solid #F20707;
+  box-shadow: 0 0 0 5px #F2B807;
+  padding: 5px;
+  width: 100%;
+  background-color: white;
+}
+
+.footer {
+  background-color: #0F0C59;
+  color: #f2b707;
+  height: 35vh;
+}
+
+.footer h4 {
+  font-size: 100%;
+  font-weight: bold;
+}
+
+.footer p {
+  font-size: 75%;
+}
+
+.footer .vstack {
+  flex: 0 0 auto;
+}
+
+.footer .last {
+  text-align: right;
+}
+
+.title {
+  width: 100;
+  background-color: #0F0C59;
+  padding: 20px;
+}
+
+.title h1 {
+  color: white;
+  font-weight: bold;
+  font-size: 200%;
+  text-align: center;
+}
+
+.section-title {
+  color: #0F0C59;
+  font-weight: bold;
+  font-size: 170%;
+  text-align: center;
+}
+
+.lead-text {
+  color: #00000053;
+  font-weight: bold;
+  text-align: center;
+}
+
+.page-ctn .logo {
+  height: 140px;
+  margin-top: 20px;
+}
+
+.page-ctn .logo {
+  height: fit-content;
+}
+
+.page-ctn .logo img {
+  height: 180px;
+}
+
+.custom-btn {
+  width: 164px;
+  height: 54px;
+
+  -webkit-mask:
+    radial-gradient(circle 10px at 0 0, transparent 100%, black 100%) top left,
+    radial-gradient(circle 10px at 100% 0, transparent 100%, black 100%) top right,
+    radial-gradient(circle 10px at 0 100%, transparent 100%, black 100%) bottom left,
+    radial-gradient(circle 10px at 100% 100%, transparent 100%, black 100%) bottom right;
+  -webkit-mask-size: 60% 60%;
+  -webkit-mask-repeat: no-repeat;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-btn button {
+  width: 153px;
+  height: 43px;
+  border: none;
+
+  -webkit-mask:
+    radial-gradient(circle 10.5px at 0 0, transparent 100%, black 100%) top left,
+    radial-gradient(circle 10.5px at 100% 0, transparent 100%, black 100%) top right,
+    radial-gradient(circle 10.5px at 0 100%, transparent 100%, black 100%) bottom left,
+    radial-gradient(circle 10.5px at 100% 100%, transparent 100%, black 100%) bottom right;
+  -webkit-mask-size: 60% 60%;
+  -webkit-mask-repeat: no-repeat;
+
+  font-weight: bold;
+  font-size: 120%;
+  letter-spacing: -1px;
+}
+
+.custom-btn.play {
+  background-color: #F2B807 !important;
+}
+
+.custom-btn.play button {
+  background-color: #F20707 !important;
+}
+
+.custom-btn.instructions {
+  background-color: #F20707 !important;
+}
+
+.custom-btn.instructions button {
+  background-color: #F2B807 !important;
+}
+
+.custom-btn{
+  transition: color 0.3s ease;
+}
+
+.custom-btn:hover button {
+  background-color: #0F0C59 !important;
+}
+
+
+/* <<< HOME LAYOUT >>> */
+
+
+/* <<< INSTRUCTIONS LAYOUT >>> */
+.instructions .list-group-item {
+  font-weight: bold !important;
+}
+
+.instructions img {
+  border-radius: 3px;
+  width: 500px;
+}
+
+/* <<< RANKING LAYOUT >>> */
+
+/* <<< LOGOUT LAYOUT >>> */
+
+/* <<< GAME LAYOUT >>> */
