@@ -15,7 +15,7 @@ POST http://localhost:3001/api/sessions
 content-type: application/json
 
 {
-  "username": "Finnn",
+  "username": "Finn",
   "password": "password1" 
 }
 
@@ -56,7 +56,7 @@ POST http://localhost:3001/api/games/route
 content-type: application/json
 
 {
-  "route": [1, 2, 3, 4]
+  "route": []
 }
 
 ###

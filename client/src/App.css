@@ -320,7 +320,31 @@
   font-size: 40px;
 }
 
-
 /* <<< LOGOUT LAYOUT >>> */
 
 /* <<< GAME LAYOUT >>> */
+.timer i {
+  color: #F20707;
+  font-size: 20px;
+}
+
+.coins i{
+  color: #F2B807;
+  font-size: 20px;
+}
+
+.timer p, .coins p {
+  font-size: 20px;
+}
+
+.game-btn {
+  border: none !important;
+  background-color: #0F0C59 !important;
+  transition: color 0.3s ease;
+  font-weight: bold !important;
+  font-size: 25px !important;
+}
+
+.game-btn:hover {
+  background-color: #F2B807 !important;
+}

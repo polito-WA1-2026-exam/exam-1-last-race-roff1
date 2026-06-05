@@ -70,16 +70,16 @@ const errorFormatter = ({ msg }) => {
   return msg;
 };
 
-const onValidationErrors = (validationResult, res) => {
+const onValidationErrors = (validationResult, res, extraFields = {}) => {
   const errors = validationResult.formatWith(errorFormatter);
-  return res.status(422).json({ validationErrors: errors.mapped() });
+  return res.status(422).json({ validationErrors: errors.mapped(), ...extraFields });
 };
 
 
 const routeValidation = [
   check('route')
-    .isArray({ min: 4 })
-    .withMessage('Route must be an array with at least 4 elements ')
+    .isArray({ min: 3 })
+    .withMessage('Route must contain at least 3 segments ')
     .bail() // stop is any previous validation fails
     .custom(route => {
       if (!Array.isArray(route) || !route.every(Number.isInteger))
@@ -87,28 +87,18 @@ const routeValidation = [
       return true;
     })
     .bail()
-    .custom((route, { req }) => { // check stations existance
+    .custom((route, { req }) => { // check segments existance
       const network = req.app.get('network');
-      const stationIds = new Set(network.stations.map(s => s.id));
+      const segmentIds = new Set(network.segments.map(s => s.id));
       for (const id of route)
-        if (!stationIds.has(id))
-          throw new Error(`Station ${id} does not exist`);
+        if (!segmentIds.has(id))
+          throw new Error(`Segment ${id} does not exist`);
       return true;
     })
     .bail()
     .custom((route) => { // check segment duplicates
-      const segments = [];
-      for (let i=0; i<route.length-1; i++) 
-        segments.push(`${route[i]}-${route[i+1]}`);
-      if (new Set(segments).size !== segments.length)
+      if (new Set(route).size !== route.length)
         throw new Error('Route cannot contain duplicate segments');
-      return true;
-    })
-    .bail()
-    .custom((route, { req }) => { // check segments existance
-      const graph = req.app.get('graph');
-      if (!validatePath(route, graph))
-        throw new Error('Invalid route segments');
       return true;
     })
 ];
@@ -167,9 +157,9 @@ app.get('/api/games/current', async (req, res) => {
   console.log(dayjs().format('YYYY-MM-DD HH:mm:ss'))
 
   if (!activeGame)
-    return res.status(404).json({ error: 'No active game found.' });
+    return res.json({ active: false });
 
-  res.json({ startStationId: activeGame.startStationId, destinationStationId: activeGame.destinationStationId, startTime: activeGame.startTime.format('YYYY-MM-DD HH:mm:ss') });
+  res.json({ active: true, startStationId: activeGame.startStationId, destinationStationId: activeGame.destinationStationId, startTime: activeGame.startTime.format('YYYY-MM-DD HH:mm:ss') });
 })
 
 app.post('/api/games', async (req, res) => {
@@ -189,7 +179,7 @@ app.post('/api/games', async (req, res) => {
     const newGame = new Game(null, req.user.id, startStationId, destinationStationId, dayjs().toISOString(), 'active')
 
     const result = await createGame(newGame);
-    res.status(201).json({ startStationId: result.startStationId, destinationStationId: result.destinationStationId, startTime: result.startTime.format('YYYY-MM-DD HH:mm:ss') });
+    res.status(201).json({ active: true, startStationId: result.startStationId, destinationStationId: result.destinationStationId, startTime: result.startTime.format('YYYY-MM-DD HH:mm:ss') });
 
   } catch (err) {
     return res.status(500).json({ err: err.message });
@@ -200,6 +190,7 @@ app.post('/api/games', async (req, res) => {
 app.post('/api/games/route', routeValidation,  async (req, res) => {
 
   const invalidFields = validationResult(req);
+  console.log(invalidFields)
   const route = req.body.route
 
   try {
@@ -213,13 +204,33 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
         return res.status(404).json({ error: "No active game found (it may be expired due to time limit: 90 seconds)." });
     }
 
-    // validation errors + check start and destination stations
+    // validation errors + check start and destination stations + check path
     if (!invalidFields.isEmpty()){
-      await endGame(game.id, 0);
-      return onValidationErrors(invalidFields, res);
+      await endGame(game.id, 0, 'invalid');
+      return onValidationErrors(invalidFields, res, { events: [], score: 0, status: 'invalid' });
     }
-    if (game.startStationId !== route[0] || game.destinationStationId !== route[route.length -1])
-      return res.status(422).json({ error: "Route start and destination do not match the assigned game stations." });
+    if (!route[0].stationIds.includes(game.startStationId) || !route[route.length -1].stationIds.includes(game.destinationStationId)) {
+      await endGame(game.id, 0, 'invalid');
+      return res.status(422).json({ 
+        validationErrors: { route: "Route start and destination do not match the assigned game stations." },
+        events: [],
+        score: 0,
+        status: 'invalid'
+      });
+    }
+    const segments = req.app.get('network').segments;
+    const segmentMap = new Map(segments.map(s => [s.id, s]));
+    const edges = route.map(id => segmentMap.get(id).stationIds);
+    if (!validatePath(edges)) {
+      await endGame(game.id, 0, 'invalid');
+      return res.status(422).json({ 
+        validationErrors: { route: "Route segments are not connected." },
+        events: [],
+        score: 0,
+        status: 'invalid'
+      });      
+    }
+
 
     // score computation + events generation
     const events = await getEvents();

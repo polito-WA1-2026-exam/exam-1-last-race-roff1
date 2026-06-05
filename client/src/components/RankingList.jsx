@@ -13,7 +13,7 @@ function RankingList(props) {
 
     useEffect(() => {
         setWaiting(true)
-        async function getRankingList() {
+        async function loadData() {
             try {
                 const rankingList = await getRankings()
                 setRankings(rankingList)
@@ -23,7 +23,7 @@ function RankingList(props) {
                 setWaiting(false)
             }
         }
-        getRankingList()
+        loadData()
     }, [])
 
     return (

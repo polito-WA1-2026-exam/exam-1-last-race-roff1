@@ -34,7 +34,7 @@ const bfsDistances = (graph, startId) => {
 
 export const findRandomNodesAtMinDistance = (graph, distance) => {
     const nodes = [...graph.keys()]
-    for (let i=0; i<20; i++) {
+    for (let i = 0; i < 20; i++) {
         const start = nodes[Math.floor(Math.random() * nodes.length)];
         const distances = bfsDistances(graph, start);
         const validDestinations = nodes.filter(id => id !== start && distances.get(id) >= distance);
@@ -48,19 +48,13 @@ export const findRandomNodesAtMinDistance = (graph, distance) => {
     throw new Error("No valid pair found in the graph");
 };
 
-export const validatePath = (path, graph) => {
-  if (!path || path.length < 5) return false;
-
-  for (let i = 0; i < path.length - 1; i++) {
-    const from = path[i];
-    const to = path[i + 1];
-
-    const neighbors = graph.get(from);
-
-    if (!neighbors || !neighbors.has(to))
-      return false;
-
-  }
-
-  return true;
+export const validatePath = (edges) => {
+    for (let i = 1; i < edges.length; i++) {
+        const prevEdge = edges[i - 1];
+        const currEdge = edges[i];
+        const sharedEdge = prevEdge.some(node => currEdge.includes(node));
+        if (!sharedEdge) 
+            return false;
+    }
+    return true;
 }

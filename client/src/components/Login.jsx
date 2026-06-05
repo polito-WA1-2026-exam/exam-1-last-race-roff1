@@ -28,7 +28,7 @@ function LoginModal(props) {
         event.preventDefault();
 
         setUsername(username.trim())
-        const newUser = new User(null, username, password)
+        const newUser = new User({ username: username, password: password })
 
         try{
             const user = await login(newUser)
@@ -80,7 +80,7 @@ function Logout(props){
     
     useEffect( () => {
         logout().then(() => {
-            props.doLogin({id: undefined, username: undefined})
+            props.doLogin(new User({}))
             navigate('/')
         })
     })

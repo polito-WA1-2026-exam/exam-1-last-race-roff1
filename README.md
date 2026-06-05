@@ -119,30 +119,38 @@
   - response body content 
     ```json 
     {
+      'active': true,
       'startStationId': ...,
       'destinationStationId': ...,
       'startTime': ...
     }
     ```  
-  - Status codes: `200 OK`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error` 
+    or
+    ``` json
+    {
+      'active': false
+    } 
+    ``` 
+  - Status codes: `200 OK`, `401 Unauthorized`, `500 Internal Server Error` 
   - Authentication required: true
 - POST `/api/games`
   - no request body content and parameters
   - response body content 
     ```json 
     {
+      'active': true,
       'startStationId': ...,
       'destinationStationId': ...,
       'startTime': ...,
     }
-    ```  
+    ``` 
   - Status codes: `201 Created`, `401 Unauthorized`, `409 Conflict`, `500 Internal Server Error` 
   - Authentication required: true
 - POST `/api/games/route`
   - request body content 
     ```json 
     {
-      'route': [firstStationId, ..., lastStationId],
+      'route': [firstSegmentId, ..., lastSegmentId],
     }
     ```
   - response body content
@@ -153,10 +161,19 @@
         'effect': ..
       }],
       'score': ..,
-      'status': ..
+      'status': ..,
+      'validationErrors': {
+        'route': ..
+      }
     }
     ```
-  - Status codes: `200 OK`, `400 Bad Request` for invalid route, `401 Unauthorized`, `404 Not Found`, `409 Conflict` for a game that has already finished, `500 Internal Server Error`
+    or
+    ```json
+    {
+      error: ..
+    }
+    ```
+  - Status codes: `200 OK`, `400 Bad Request` for invalid route, `401 Unauthorized`, `404 Not Found`, `409 Conflict`, `422 Unprocessable Entity` for a game that has already finished, `500 Internal Server Error`
   - Authentication required: true
 
 

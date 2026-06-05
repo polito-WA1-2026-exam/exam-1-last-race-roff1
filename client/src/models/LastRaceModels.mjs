@@ -1,53 +1,51 @@
 import dayjs from "dayjs";
 
-function User(id, username, password = null){
+function User({id, username, password}){
     this.id = id
     this.username = username
     this.password = password
 }
 
-function Game(id, userId, startStationId, destinationStationId, startTime, status, score = null){
-    this.id = id
-    this.userId = userId
+function Game({startStationId, destinationStationId, startTime, score = 20, events = [], active = true}){
     this.startStationId = startStationId
     this.destinationStationId = destinationStationId
     this.startTime = startTime && dayjs(startTime)
-    this.status = status
+    this.events = events
     this.score = score
+    this.active = active
 }
 
-function Line(id, name, color){
+function Line({id, name, color}){
     this.id = id
     this.name = name
     this.color = color
 }
 
-function Station(id, name, positionX, positionY){
+function Station({id, name, positionX, positionY}){
     this.id = id
     this.name = name
     this.positionX = positionX
     this.positionY = positionY
 }
 
-function Segment(id, firstStationId, secondStationId, lineId){
+function Segment({id, firstStationId, secondStationId, lineId}){
     this.id = id
     this.stationIds = [firstStationId, secondStationId]
     this.lineId = lineId
 }
 
-function Network(lines, stations, segments){
+function Network({lines, stations, segments}){
     this.lines = lines
     this.stations = stations
     this.segments = segments
 }
 
-function Event(id, description, effect){
-    this.id = id
+function Event({description, effect}){
     this.description = description
     this.effect = effect
 }
 
-function RankingEntry(username, bestScore){
+function RankingEntry({username, bestScore}){
     this.username = username
     this.bestScore = bestScore
 }
