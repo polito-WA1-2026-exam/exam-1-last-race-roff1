@@ -35,7 +35,7 @@ function NavigationRail(props) {
                     </div>
                     <div>
                         <Link title='Logout' to='/logout'>
-                            <i class="bi bi-door-closed-fill"></i>
+                            <span className="material-symbols-outlined">logout</span>
                         </Link>
                     </div>                
                 </>

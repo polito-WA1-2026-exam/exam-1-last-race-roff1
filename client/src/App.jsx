@@ -4,7 +4,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { useState, useEffect } from 'react';
 import UserContext from './contexts/UserContext.js';
-import { useNavigate } from 'react-router'
+import { useNavigate, Link } from 'react-router'
 
 import { Container, Row, Col } from 'react-bootstrap';
 
@@ -17,12 +17,14 @@ import { MovingTrain } from './components/MovingTrain.jsx'
 import { Logo } from './components/Logo.jsx'
 import { RulePlayButton } from './components/RulePlayButton.jsx'
 import { InstructionsAccordion } from './components/InstructionsAccordion.jsx'
+import { RankingList } from './components/RankingList.jsx'
 
 import { getCurrentUser } from './api/auth.js'
 
 function App() {
   const [user, setUser] = useState({ id: undefined, username: undefined });
   const [isLoginVisible, setIsLoginVisible] = useState(false);
+  const [playAfterLogin, setPlayAfterLogin] = useState(false)
   const navigate = useNavigate()
 
   // at application launch > check session
@@ -35,13 +37,15 @@ function App() {
   }, [])
 
   const doLogin = (newUser) => {
-    setUser({ id: newUser.id, email: newUser.username })
+    setUser({ id: newUser.id, username: newUser.username })
     navigate('/')
   }
 
   const handlePlay = () => {
-    if (!user?.id) 
+    if (!user?.id) {
+      setPlayAfterLogin(true)
       return setIsLoginVisible(true);
+    }
     navigate('/game');
   };
 
@@ -50,13 +54,13 @@ function App() {
       <Container fluid className='p-0'>
         <Routes>
 
-          <Route path='/' element={<BaseLayout doLogin={doLogin} isLoginVisible={isLoginVisible} setIsLoginVisible={setIsLoginVisible} />}>
+          <Route path='/' element={<BaseLayout doLogin={doLogin} isLoginVisible={isLoginVisible} setIsLoginVisible={setIsLoginVisible} playAfterLogin={playAfterLogin} setPlayAfterLogin={setPlayAfterLogin} />}>
             <Route index element={<HomeLayout handlePlay={handlePlay} />} />
             <Route path='instructions' element={<InstructionsLayout handlePlay={handlePlay} />} />
             <Route path='game' element={<GameLayout />} />
             <Route path='ranking' element={<RankingLayout />} />
             <Route path='logout' element={<Logout doLogin={doLogin} />} />
-            <Route path='page-not-found' element={<NotFoundLayout />} />
+            <Route path='*' element={<PageNotFoundLayout />} />
           </Route>
 
         </Routes>
@@ -67,6 +71,11 @@ function App() {
 }
 
 function BaseLayout(props) {
+
+  const handleModalClose = () => {
+    props.setIsLoginVisible(false); 
+    props.setPlayAfterLogin(false);
+  }
 
   return <>
     <Header showLoginModal={()=>props.setIsLoginVisible(true)} />
@@ -87,7 +96,7 @@ function BaseLayout(props) {
 
       <MovingTrain />
     </Container>
-    <LoginModal show={props.isLoginVisible} handleClose={()=>props.setIsLoginVisible(false)}/>
+    <LoginModal show={props.isLoginVisible} handleClose={handleModalClose} playAfterSubmit={props.playAfterLogin} doLogin={props.doLogin} />
     <Footer />
   </>
 }
@@ -125,7 +134,7 @@ function InstructionsLayout(props) {
       <div className='title'>
         <h1>INSTRUCTIONS TO PLAY</h1>
       </div>
-      <p className='justify-text'>Your goal is simple: travel through the underground network and reach your destination before time runs out. At the beginning of each game you receive <strong>20 coins</strong> and a randomly assigned journey. During the trip, unexpected events may increase or decrease your score. Plan carefully: only a valid route can lead you to victory.</p>
+      <p>Your goal is simple: travel through the underground network and reach your destination before time runs out. At the beginning of each game you receive <strong>20 coins</strong> and a randomly assigned journey. During the trip, unexpected events may increase or decrease your score. Plan carefully: only a valid route can lead you to victory.</p>
       
       <h3 className='section-title mt-4'>GAME OVERVIEW</h3>
       <InstructionsAccordion handlePlay={props.handlePlay} />
@@ -143,12 +152,27 @@ function GameLayout(props) {
 }
 
 function RankingLayout(props) {
-
+  return (
+    <>
+      <div className='title'>
+        <h1>TOP RIDERS OF THE UNDERGROUND</h1>
+      </div>
+      <Logo className='mt-2' />
+      <p className='lead-text mt-4'>Discover the best riders and how many coins they managed to collect along their journeys!</p>
+      <RankingList />
+    </>
+  )
 }
 
-function NotFoundLayout(props) {
-
-
+function PageNotFoundLayout(props) {
+  return (
+    <>
+      <div className='title'>
+        <h1>IT SEEMS A PASSENGER TOOK THE WRONG LINE</h1>
+      </div>
+      <p>Don't worry, this line will take you home <Link to='/'>link</Link></p>
+    </>
+  )
 }
 
 export default App

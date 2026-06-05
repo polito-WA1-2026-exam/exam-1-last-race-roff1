@@ -28,18 +28,23 @@ function UserArea(props) {
     const user = useContext(UserContext)
 
     return (
-        <div>
+        <>
             {user.id !== undefined ? (
                 <>
-                    <span>Welcome {user.username}</span>
-                    <Button onClick={onLogout} className='logout-btn'>Logout</Button>
+                    <span className="me-2">Welcome <strong>{user.username}</strong></span>
+                    <Link to='/logout' title="Logout" className="log-btn">
+                        <span className="material-symbols-outlined">logout</span>
+                    </Link>
                 </>
             ) : (
-                <Button onClick={props.showLoginModal} title='Login' className='login-btn'>
-                    <i className="bi bi-person-circle"></i>
-                </Button>
+                <>
+                    <span className="me-2">Login</span>
+                    <Button onClick={props.showLoginModal} title='Login' className='log-btn'>
+                        <i className="bi bi-person-circle"></i>
+                    </Button>                
+                </>
             )}
-        </div>
+        </>
     );
 }
 

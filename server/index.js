@@ -116,7 +116,7 @@ const routeValidation = [
 
 const userValidation = [
   check('username').trim().isString().notEmpty().withMessage("Username must be a non-empty string"),
-  check('password').isString().notEmpty().withMessage("Password must be a non-empty string")
+  check('password').trim().isString().notEmpty().withMessage("Password must be a non-empty string")
 ]
 
 

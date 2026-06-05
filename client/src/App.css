@@ -4,6 +4,8 @@
   border-left: 5px solid #0F0C59;
 }
 
+/* HEADER */
+
 .header {
   background-color: #F2B807;
 }
@@ -20,26 +22,27 @@
   height: 70px;
 }
 
-.logout-btn {
-  background-color: #0F0C59;
-  border-radius: 5px;
-}
-
-.login-btn {
+.log-btn {
   background-color: #0F0C59 !important;
   border-radius: 100% !important;
   border: none !important;
-  transition: color 0.3s ease
+  transition: color 0.3s ease;
 }
 
-.login-btn i {
+.log-btn i, .log-btn .material-symbols-outlined {
   color: #F2B807;
   font-size: 20px;
 }
 
-.login-btn:hover {
+.material-symbols-outlined { /* logout google icon */
+  padding: 7px;
+}
+
+.log-btn:hover {
   background-color: #F20707 !important;
 }
+
+/* SIDEBARS + CENTRAL CONTAINER */
 
 .nav-rail {
   position: fixed;
@@ -59,7 +62,7 @@
   align-items: center;
 }
 
-.nav-rail i {
+.nav-rail i, .nav-rail .material-symbols-outlined { /* also google icon */
   font-size: 20px;
   color: #0F0C59 !important;
   display: inline-block;
@@ -71,7 +74,7 @@
   border: none !important;
 }
 
-.nav-rail i:hover {
+.nav-rail i:hover, .nav-rail .material-symbols-outlined:hover {
   transform: scale(1.1);
   color: #F20707 !important;
 }
@@ -96,7 +99,7 @@
   background-repeat: repeat;
   background-size: 120px 120px;
 
-  opacity: 0.2;
+  opacity: 0.3;
   z-index: -1;
 }
 
@@ -131,6 +134,8 @@
 .footer .last {
   text-align: right;
 }
+
+/* TEXT styles */
 
 .title {
   width: 100;
@@ -170,6 +175,8 @@
 .page-ctn .logo img {
   height: 180px;
 }
+
+/* PLAY NOW and HOW TO PLAY buttons */
 
 .custom-btn {
   width: 164px;
@@ -230,6 +237,24 @@
   background-color: #0F0C59 !important;
 }
 
+/* LOGIN MODAL */
+.modal-content {
+  background-color: #0F0C59 !important;
+  color: #F2B807 !important;
+}
+
+.modal button {
+  background-color: #F2B807;
+  color:#0F0C59;
+  border: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.modal button:hover {
+  color: white;
+  background-color: #F2B807;
+}
 
 /* <<< HOME LAYOUT >>> */
 
@@ -245,6 +270,56 @@
 }
 
 /* <<< RANKING LAYOUT >>> */
+.rank-ctn {
+  position: relative;
+  width: 500px;
+}
+
+.rank-ctn img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rank-ctn p {
+  position: absolute;
+  font-weight: bold;
+  text-align: center;
+}
+
+.rank-ctn .position {
+  color: #F2B807;
+  width: 100px;
+  border-bottom: 2px solid #F2B807;
+  top: 20%;
+  left: 16%;
+  font-size: 17px;
+  transform: translate(-50%, -50%);
+}
+
+.rank-ctn .username {
+  color: white;
+  width: 100px;
+  border-bottom: 2px solid white;
+  top: 40%;
+  left: 16%;
+  font-size: 20px;
+  transform: translate(-50%, -50%);
+}
+
+.rank-ctn .score {
+  color:#F20707;
+  top: 40%;
+  left: 80%;
+  font-size: 18px;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+}
+
+.rank-ctn .score span {
+  font-size: 40px;
+}
+
 
 /* <<< LOGOUT LAYOUT >>> */
 
