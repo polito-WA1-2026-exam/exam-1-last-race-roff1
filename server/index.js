@@ -83,7 +83,7 @@ const routeValidation = [
     .bail() // stop is any previous validation fails
     .custom(route => {
       if (!Array.isArray(route) || !route.every(Number.isInteger))
-        throw new Error('Route must be an array of integers')
+        throw new Error('Route must be an array of integers');
       return true;
     })
     .bail()
@@ -153,9 +153,6 @@ app.get('/api/games/current', async (req, res) => {
 
   const activeGame = await getActiveGame(req.user.id);
 
-  console.log(activeGame)
-  console.log(dayjs().format('YYYY-MM-DD HH:mm:ss'))
-
   if (!activeGame)
     return res.json({ active: false });
 
@@ -190,8 +187,10 @@ app.post('/api/games', async (req, res) => {
 app.post('/api/games/route', routeValidation,  async (req, res) => {
 
   const invalidFields = validationResult(req);
-  console.log(invalidFields)
   const route = req.body.route
+
+  const segments = req.app.get('network').segments;
+  const segmentMap = new Map(segments.map(s => [s.id, s]));
 
   try {
 
@@ -209,7 +208,8 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
       await endGame(game.id, 0, 'invalid');
       return onValidationErrors(invalidFields, res, { events: [], score: 0, status: 'invalid' });
     }
-    if (!route[0].stationIds.includes(game.startStationId) || !route[route.length -1].stationIds.includes(game.destinationStationId)) {
+    const [firstSegmentStationIds, lastSegmentStationIds] = [segmentMap.get(route[0]).stationIds, segmentMap.get(route[route.length -1])]
+    if (!firstSegmentStationIds.includes(game.startStationId) || !lastSegmentStationIds.stationIds.includes(game.destinationStationId)) {
       await endGame(game.id, 0, 'invalid');
       return res.status(422).json({ 
         validationErrors: { route: "Route start and destination do not match the assigned game stations." },
@@ -218,8 +218,7 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
         status: 'invalid'
       });
     }
-    const segments = req.app.get('network').segments;
-    const segmentMap = new Map(segments.map(s => [s.id, s]));
+    
     const edges = route.map(id => segmentMap.get(id).stationIds);
     if (!validatePath(edges)) {
       await endGame(game.id, 0, 'invalid');

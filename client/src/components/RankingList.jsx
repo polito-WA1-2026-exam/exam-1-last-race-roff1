@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { getRankings } from '../api/api.js'
 
 import ListGroup from 'react-bootstrap/ListGroup';
-import Spinner from 'react-bootstrap/Spinner';
+import { CustomSpinner } from './CustomSpinner.jsx'
 
 function RankingList(props) {
     const [rankings, setRankings] = useState([]);
@@ -28,13 +28,7 @@ function RankingList(props) {
 
     return (
         <ListGroup variant="flush">
-            {waiting && (
-                <div className='d-flex justify-content-center'>
-                    <Spinner animation="border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </Spinner>
-                </div>
-            )}
+            {waiting && <CustomSpinner />}
             
             {error && <p className="text-center">{error.message}</p>}
             

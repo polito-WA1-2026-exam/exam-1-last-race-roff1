@@ -124,7 +124,7 @@ async function startNewGame() {
     }    
 }
 
-async function submitRoute(route, game) {
+async function submitRoute(route) {
     try {
         await delay(1000);
         const response = await fetch(`http://localhost:3001/api/games/route`, {
@@ -138,8 +138,7 @@ async function submitRoute(route, game) {
 
         if(response.ok) {
             const gameResult = await response.json()
-            return [new Game({
-                ...game,                      
+            return [new Game({                 
                 score: gameResult.score,
                 events: (gameResult.events || []).map(e => new Event({ description: e.description, effect: e.effect })),
                 status: gameResult.status,
@@ -149,8 +148,7 @@ async function submitRoute(route, game) {
 
         if(response.status === 422){
             const gameResult = await response.json()
-            return [new Game({
-                ...game,                      
+            return [new Game({                  
                 score: gameResult.score,
                 events: (gameResult.events || []).map(e => new Event({ description: e.description, effect: e.effect })),
                 status: gameResult.status,

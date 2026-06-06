@@ -24,7 +24,7 @@ export const createGame = (game) => {
 export const endGame = (id, score, status='completed') => {
     return new Promise((resolve, reject) => {
         const sql = `UPDATE games SET score = ?, status = ? WHERE id = ?`
-        db.run(sql, [score, id, status], function(err) {
+        db.run(sql, [score, status, id], function(err) {
             if(err) 
                 reject(err);
             else 

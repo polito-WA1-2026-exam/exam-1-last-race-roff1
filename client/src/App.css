@@ -325,16 +325,16 @@
 /* <<< GAME LAYOUT >>> */
 .timer i {
   color: #F20707;
-  font-size: 20px;
+  font-size: 30px;
 }
 
 .coins i{
   color: #F2B807;
-  font-size: 20px;
+  font-size: 30px;
 }
 
 .timer p, .coins p {
-  font-size: 20px;
+  font-size: 30px;
 }
 
 .game-btn {
@@ -343,8 +343,43 @@
   transition: color 0.3s ease;
   font-weight: bold !important;
   font-size: 25px !important;
+  padding: 10px !important;
+  color: white;
+  margin-top: 5px;
+  border-radius: 5px;
+  text-decoration: none;
 }
 
 .game-btn:hover {
   background-color: #F2B807 !important;
+}
+
+.map {
+  background-color: white;
+  border: 1px solid #0f0c5952;
+  border-radius: 5px;
+}
+.segment-option {
+  padding: 3px !important;
+}
+.segment-option button {
+  background-color: #0F0C59 !important;
+  border: 2px solid #F20707;
+  padding: 3px !important;
+  font-size: 15px;
+}
+
+.route-title {
+  font-weight: bold;
+  text-align: center;
+  font-size: 25px;
+  color:#0F0C59;
+  margin: 0;
+}
+
+.final-score {
+  margin: 0px;
+  margin-right: 15px;
+  margin-left: 15px;
+  font-size: 20px !important;
 }
