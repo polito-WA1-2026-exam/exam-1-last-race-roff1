@@ -96,13 +96,26 @@ function PlanningView(props) {
                     </Col>
                 </Row>
 
-
             </Container>
         </>
     )
 }
 
 function ExecutionView(props) {
+    console.log(props.events)
+    console.log(props.stationNamesSteps)
+    const pathFormatter = (path) => { // extract a meaningful sequence of segments: [B, A] [C, B] > [A, B] [B, C]
+        if (path.length === 1)
+            return path;
+        if (path[1].includes(path[0][0]))
+            path[0] = path[0].reverse()
+        if (path[path.length - 2].includes(path[path.length - 1][1]))
+            path[path.length - 1] = path[path.length - 1].reverse()
+        for (let i = 1; i < path.length - 1; i++)
+            if (path[i + 1].includes(path[i][0]))
+                path[i] = path[i].reverse()
+        return path
+    }
 
     return (
         <>
@@ -113,7 +126,7 @@ function ExecutionView(props) {
 
             <Container>
                 <Row>
-                    <EventsCarousel onLastView={props.nextPhase} />
+                    <EventsSlider events={props.events} stationNamesSteps={pathFormatter(props.stationNamesSteps)} onLastView={props.nextPhase} />
                 </Row>
             </Container>
         </>
@@ -286,7 +299,7 @@ function Timer(props) {
     const startTime = dayjs(props.startTime)
 
     useEffect(() => {
-        if (startTime.isValid()){
+        if (startTime.isValid()) {
             const interval = setInterval(() => {
                 const elapsed = dayjs().diff(startTime, "second");
                 const remaining = Math.max(props.duration - elapsed, 0);
@@ -319,11 +332,53 @@ function Coins(props) {
     )
 }
 
-function EventsCarousel(props) {
+function EventsSlider(props) {
+    // <EventsSlider stationNamesSteps={pathFormatter(props.stationNamesSteps)} onLastView={props.nextPhase} />
+    const [idx, setIdx] = useState(0)
+
+    const next = () => setIdx(oldIdx => Math.min(oldIdx + 1, props.events.length - 1))
+    const prev = () => setIdx(oldIdx => Math.max(oldIdx - 1, 0))
+
+    const scores = [20]
+    for (const effect of props.events.map(e => e.effect))
+        scores.push(scores[scores.length - 1] + effect)
+
+    const [fromStation, toStation] = [props.stationNamesSteps[idx][0], props.stationNamesSteps[idx][1]]
+    const description = props.events[idx].description
+
     return (
-        <>
-        </>
+        <Container className="events-slider">
+            <Row>
+                <Col>
+                    <h4 className="section-title">{description}</h4>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <p className='event-from-to'>FROM <strong>{fromStation}</strong> TO <strong>{toStation}</strong></p>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <p className={`event-effect ${props.events[idx].effect < 0 ? 'text-danger' : (props.events[idx].effect > 0 ? 'text-success' : 'text-secondary')}`} >{props.events[idx].effect >= 0 && '+'}{props.events[idx].effect}</p>
+                </Col>
+            </Row>
+            <Row className='event-score-change-ctn'>
+                <Col className='d-flex justify-content-center align-items-center'>
+                    <Coins amount={scores[idx]}/><i className="bi bi-caret-right-fill mx-4"></i><Coins amount={scores[idx+1]}/>
+                </Col>
+                
+            </Row>
+            <Row>
+                <Col className={`d-flex ${(props.events.length > 1 && idx ===0) ? 'justify-content-center' : 'justify-content-between'} align-items-center`}>
+                    {idx > 0 && <Button onClick={prev} className="event-btn"><i className="bi bi-arrow-left-short"></i></Button>}
+                    {idx < props.events.length - 1 && <Button onClick={next} className="event-btn"><i class="bi bi-arrow-right-short"></i></Button>}
+                    {idx === props.events.length - 1 && <Button className="event-btn" onClick={props.onLastView}>RESULT</Button>}
+                </Col>
+            </Row>
+        </Container>
     )
 }
 
-export { NetworkMap, SegmentOptions, SelectedSegments, Timer, Coins, EventsCarousel, SetupView, PlanningView, ExecutionView, ResultView }
+
+export { SetupView, PlanningView, ExecutionView, ResultView }

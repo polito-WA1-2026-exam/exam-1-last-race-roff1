@@ -1,4 +1,4 @@
-import { RankingEntry, Network, Station, Line, Segment, Game } from '../models/LastRaceModels.mjs';
+import { RankingEntry, Network, Station, Line, Segment, Game, Event } from '../models/LastRaceModels.mjs';
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -8,7 +8,7 @@ function delay(ms) {
 async function getRankings() {
     try {
 
-        await delay(1000);
+        await delay(500);
         const response = await fetch('http://localhost:3001/api/ranking', {
             credentials: 'include'
         })
@@ -17,17 +17,16 @@ async function getRankings() {
             return rankings.map(r => new RankingEntry({ username: r.username, bestScore: r.bestScore }))
         }
         
-        if (response.status === 401)
-            throw new Error("Unauthorized");
-        
-        // 500 Internal Server Error
-        throw new Error('HTTP error in getRankings, code=' + response.status)
-        
+        const errorData = await response.json()
+        const serverErrorMessage = errorData?.error || 'No error message provided'
+
+        const httpError = new Error(`HTTP error in getRankings, failed with code ${response.status}: ${serverErrorMessage}`);
+        httpError.status = response.status;
+        throw httpError;
             
     } catch (ex) {
-        if (ex.name === "TypeError") // network error in fetch
-            throw new Error('Network error', { cause: ex });
-
+        if (ex.status) // HTTP error
+            throw ex;
         throw ex;
     }
 
@@ -36,7 +35,7 @@ async function getRankings() {
 async function getNetwork() {
     try {
 
-        await delay(1000);
+        await delay(500);
         const response = await fetch('http://localhost:3001/api/network', {
             credentials: 'include'
         })
@@ -49,17 +48,17 @@ async function getNetwork() {
             })
         }
         
-        if (response.status === 401)
-            throw new Error("Unauthorized");
-        
-        // 500 Internal Server Error
-        throw new Error('HTTP error in getNetwork, code=' + response.status)
-        
+        const errorData = await response.json()
+        const serverErrorMessage = errorData?.error || 'No error message provided'
+
+        const httpError = new Error(`HTTP error in getNetwork, failed with code ${response.status}: ${serverErrorMessage}`);
+        httpError.status = response.status;
+        throw httpError;
+            
             
     } catch (ex) {
-        if (ex.name === "TypeError") // network error in fetch
-            throw new Error('Network error', { cause: ex });
-
+        if (ex.status) // HTTP error
+            throw ex;
         throw ex;
     } 
 }
@@ -68,7 +67,7 @@ async function getActiveGame() {
 
     try {
 
-        await delay(1000);
+        await delay(500);
         const response = await fetch('http://localhost:3001/api/games/current', {
             credentials: 'include'
         })
@@ -84,17 +83,16 @@ async function getActiveGame() {
             })
         }
         
-        if (response.status === 401)
-            throw new Error("Unauthorized");
-        
-        // 500 Internal Server Error
-        throw new Error('getNetwork failed with code ' + response.status)
-        
+        const errorData = await response.json()
+        const serverErrorMessage = errorData?.error || 'No error message provided'
+
+        const httpError = new Error(`HTTP error in getActiveGame, failed with code ${response.status}: ${serverErrorMessage}`);
+        httpError.status = response.status;
+        throw httpError;
             
     } catch (ex) {
-        if (ex.name === "TypeError") // network error in fetch
-            throw new Error('Network error', { cause: ex });
-
+        if (ex.status) // HTTP error
+            throw ex;
         throw ex;
     } 
 
@@ -102,7 +100,7 @@ async function getActiveGame() {
 
 async function startNewGame() {
     try {
-        await delay(1000);
+        await delay(500);
         const response = await fetch(`http://localhost:3001/api/games`, {
             method: 'POST',
             credentials: 'include'
@@ -116,17 +114,26 @@ async function startNewGame() {
                 startTime: game.startTime, 
                 active: game.active
             })
-        } else {
-            throw new Error('startNewGame failed with code ' + response.status)
-        }
+        } 
+
+        const errorData = await response.json()
+        const serverErrorMessage = errorData?.error || 'No error message provided'
+
+        const httpError = new Error(`HTTP error in startNewGame, failed with code ${response.status}: ${serverErrorMessage}`);
+        httpError.status = response.status;
+        throw httpError;
+
+
     } catch (ex) { // network error in fetch
+        if (ex.status) // HTTP error
+            throw ex;
         throw new Error("Network error in startNewGame", {cause: ex})
     }    
 }
 
 async function submitRoute(route) {
     try {
-        await delay(1000);
+        await delay(500);
         const response = await fetch(`http://localhost:3001/api/games/route`, {
             method: 'POST',
             body: JSON.stringify({route: route}),
@@ -156,10 +163,17 @@ async function submitRoute(route) {
             }), gameResult.validationErrors.route];
         }
         
-        throw new Error('submitRoute failed with code ' + response.status)
+        const errorData = await response.json()
+        const serverErrorMessage = errorData?.error || 'No error message provided'
 
-    } catch (ex) { // network error in fetch
-        throw new Error("Network error in submitRoute", {cause: ex})
+        const httpError = new Error(`HTTP error in submitRoute, failed with code ${response.status}: ${serverErrorMessage}`);
+        httpError.status = response.status;
+        throw httpError;
+
+    } catch (ex) {
+        if (ex.status) // HTTP error
+            throw ex;
+        throw new Error("Network error in submitRoute", {cause: ex}) // network error
     }
 }
 

@@ -1,49 +1,78 @@
 async function login({username, password}) {
-    const response = await fetch('http://localhost:3001/api/sessions', {
-        method: 'POST',
-        body: JSON.stringify({ username, password }),
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-    });
+    try{
+        const response = await fetch('http://localhost:3001/api/sessions', {
+            method: 'POST',
+            body: JSON.stringify({ username, password }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
 
-    if (response.ok)
-        return await response.json();
+        if (response.ok)
+            return await response.json();
 
-    // Unauthorized
-    if (response.status === 401)
-        throw new Error(JSON.stringify({ error: "Invalid username or password" }));
+        // Unauthorized
+        if (response.status === 401){
+            const serverError = new Error(JSON.stringify({ error: "Invalid username or password" }));
+            serverError.status = response.status;
+            throw serverError
+        }
 
-    // Validation error
-    if (response.status === 422) {
-        const data = await response.json();
-        throw new Error(JSON.stringify(data.validationErrors));
+        // Validation error
+        if (response.status === 422) {
+            const data = await response.json();
+            const serverError = new Error(JSON.stringify(data.validationErrors));
+            serverError.status = response.status;
+            throw serverError
+        }
+
+        const serverError = new Error(JSON.stringify({ error: 'Server error' }));
+        serverError.status = response.status;
+        throw serverError;
+    } catch (ex) {
+        if (ex.status) // HTTP error
+            throw ex;
+        throw new Error(JSON.stringify({ error: "Network error in login" }), { cause: ex }); // network error
     }
 
-    throw new Error(JSON.stringify({ error: 'Server error' }));
 }
 
 async function logout() {
-    const response = await fetch('http://localhost:3001/api/sessions/current', {
-        method: 'DELETE',
-        credentials: 'include'
-    })
+    try {
+        const response = await fetch('http://localhost:3001/api/sessions/current', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
 
-    if (response.ok)
-        return true
-    else 
-        throw new Error("Login failed")
+        if (response.ok)
+            return true;
+        
+        const serverError = new Error(JSON.stringify({ error: "Logout failed on server" }));
+        serverError.status = response.status;
+        throw serverError
+
+    } catch (ex) {
+        if (ex.status)
+            throw ex;
+        throw new Error(JSON.stringify({ error: "Network error in logout" }), { cause: ex });
+    }
+
 }
 
 async function getCurrentUser() {
-    const response = await fetch('http://localhost:3001/api/sessions/current', {
-        credentials: "include"
-    })
-    if(response.ok)
-        return await response.json()
-    else
-        return null
+    try {
+        const response = await fetch('http://localhost:3001/api/sessions/current', {
+            credentials: "include"
+        })
+        if(response.ok)
+            return await response.json()
+        else
+            return null
+    } catch (ex) {
+        console.error("Network error in getCurrentUser", {cause: ex})
+    }
+
 }
 
 export { login, logout, getCurrentUser }

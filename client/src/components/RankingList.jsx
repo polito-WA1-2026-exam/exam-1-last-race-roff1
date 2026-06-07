@@ -1,36 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-
 import { getRankings } from '../api/api.js'
-
 import ListGroup from 'react-bootstrap/ListGroup';
 import { CustomSpinner } from './CustomSpinner.jsx'
 
 function RankingList(props) {
     const [rankings, setRankings] = useState([]);
     const [error, setError] = useState('');
-    const [waiting, setWaiting] = useState(true)
+    const [waiting, setWaiting] = useState(true);
 
     useEffect(() => {
-        setWaiting(true)
+        setWaiting(true);
         async function loadData() {
             try {
-                const rankingList = await getRankings()
-                setRankings(rankingList)
+                const rankingList = await getRankings();
+                setRankings(rankingList);
+                setError('');
             } catch(ex) {
-                setError(ex)
+                setError(ex.message);
             } finally {
-                setWaiting(false)
+                setWaiting(false);
             }
         }
-        loadData()
+        loadData();
     }, [])
 
     return (
         <ListGroup variant="flush">
             {waiting && <CustomSpinner />}
             
-            {error && <p className="text-center">{error.message}</p>}
+            {error && <p className="text-center">{error}</p>}
             
             {rankings.map((r, i) => (
                 <RankingItem key={r.username} ranking={r} position={i+1} />
@@ -53,4 +51,4 @@ function RankingItem(props) {
     )
 }
 
-export { RankingList }
+export { RankingList };

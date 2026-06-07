@@ -8,19 +8,19 @@ import { useNavigate, Link, Outlet, Route, Routes } from 'react-router'
 
 import { getNetwork, getActiveGame, startNewGame, submitRoute } from './api/api.js'
 
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 
 import { Header } from './components/Header.jsx'
 import { NavigationRail } from './components/NavigationRail.jsx'
 import { Footer } from './components/Footer.jsx'
-import { LoginModal, Logout } from './components/Login.jsx'
+import { LoginModal } from './components/Login.jsx'
 import { Logo } from './components/Logo.jsx'
 import { RulePlayButton } from './components/RulePlayButton.jsx'
 import { InstructionsAccordion } from './components/InstructionsAccordion.jsx'
 import { RankingList } from './components/RankingList.jsx'
 import { SetupView, PlanningView, ExecutionView, ResultView } from './components/GameViews.jsx'
 
-import { getCurrentUser } from './api/auth.js'
+import { getCurrentUser, logout } from './api/auth.js'
 
 import { User } from './models/LastRaceModels.mjs'
 import { CustomSpinner } from './components/CustomSpinner.jsx';
@@ -35,7 +35,7 @@ function App() {
   useEffect(() => {
     getCurrentUser().then(result => {
       if (result) {
-        setUser(new User({ id: result.id, username: result.username }))
+        setUser(new User({ id: result.id, username: result.username }));
       }
     })
   }, [])
@@ -45,9 +45,19 @@ function App() {
     navigate('/')
   }
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUser(new User({}));
+      navigate('/');
+    } catch (err) {
+      console.error("Error during logout process.", err)
+    }
+  }
+
   const handlePlay = () => {
     if (!user?.id) {
-      setPlayAfterLogin(true)
+      setPlayAfterLogin(true);
       return setIsLoginVisible(true);
     }
     navigate('/game');
@@ -58,12 +68,20 @@ function App() {
       <Container fluid className='p-0'>
         <Routes>
 
-          <Route path='/' element={<BaseLayout doLogin={doLogin} isLoginVisible={isLoginVisible} setIsLoginVisible={setIsLoginVisible} playAfterLogin={playAfterLogin} setPlayAfterLogin={setPlayAfterLogin} />}>
+          <Route path='/' element={
+            <BaseLayout 
+              doLogin={doLogin} 
+              onLogout={handleLogout}
+              isLoginVisible={isLoginVisible} 
+              setIsLoginVisible={setIsLoginVisible} 
+              playAfterLogin={playAfterLogin} 
+              setPlayAfterLogin={setPlayAfterLogin} 
+            />
+          }>
             <Route index element={<HomeLayout handlePlay={handlePlay} />} />
             <Route path='instructions' element={<InstructionsLayout handlePlay={handlePlay} />} />
             <Route path='game' element={<GameLayout />} />
             <Route path='ranking' element={<RankingLayout />} />
-            <Route path='logout' element={<Logout doLogin={doLogin} />} />
             <Route path='*' element={<PageNotFoundLayout />} />
           </Route>
 
@@ -82,11 +100,11 @@ function BaseLayout(props) {
   }
 
   return <>
-    <Header showLoginModal={() => props.setIsLoginVisible(true)} />
+    <Header showLoginModal={() => props.setIsLoginVisible(true)} onLogout={props.onLogout} />
     <Container fluid>
       <Row>
         <Col xs={1} className='sidebar'>
-          <NavigationRail />
+          <NavigationRail onLogout={props.onLogout}/>
         </Col>
         <Col xs={10} className='central-ctn'>
           <div className='page-ctn'>
@@ -99,7 +117,12 @@ function BaseLayout(props) {
       </Row>
 
     </Container>
-    <LoginModal show={props.isLoginVisible} handleClose={handleModalClose} playAfterSubmit={props.playAfterLogin} doLogin={props.doLogin} />
+    <LoginModal 
+      show={props.isLoginVisible} 
+      handleClose={handleModalClose} 
+      playAfterSubmit={props.playAfterLogin} 
+      doLogin={props.doLogin} 
+    />
     <Footer />
   </>
 }
@@ -160,15 +183,16 @@ function GameLayout(props) {
 
   const idStationMap = new Map((network?.stations || []).map(s => [Number(s.id), s]));
   const idLineMap = new Map((network?.lines || []).map(l => [Number(l.id), l]));
+  const idSegmentMap = new Map((network?.segments || []).map(s => [Number(s.id), s]));
 
   const restoreGame = (activeGame) => {
-    setGame(activeGame)
-    setRestored(true)
-    setPhase('planning')
+    setGame(activeGame);
+    setRestored(true);
+    setPhase('planning');
   }
 
-  /* At app launch > load the network and check if active game */
   useEffect(() => {
+
     switch (phase) {
       case "setup": 
         setWaiting(true)
@@ -285,10 +309,22 @@ function GameLayout(props) {
 
     /* send the route and see the events */
     case "execution":
+
+      // if the server has not yet responded with events, stay loading
+      if (!game?.events || game.events.length === 0) {
+        return (
+          <>
+            <div className='title mb-2'>
+              <h1>Calculating route events...</h1>
+            </div>
+            <CustomSpinner />
+          </>
+        );
+      }
       return <ExecutionView
         // events
         events={game?.events ?? []}
-        score={game?.score}
+        stationNamesSteps={route.map(sId => (idSegmentMap.get(sId)?.stationIds ?? []).map(stId => idStationMap.get(Number(stId))?.name ?? ''))}
         nextPhase={() => setPhase('result')} />;
 
     /* see the final score */

@@ -17,7 +17,7 @@ function Header(props) {
                     <Link to="/"><Logo /></Link>
                 </Col>
                 <Col xs={5} className='d-flex justify-content-end align-items-center'>
-                    <UserArea showLoginModal={props.showLoginModal} />
+                    <UserArea showLoginModal={props.showLoginModal} onLogout={props.onLogout} />
                 </Col>
             </Row>
         </Container>
@@ -32,15 +32,15 @@ function UserArea(props) {
             {user.id !== undefined ? (
                 <>
                     <span className="me-2">Welcome <strong>{user.username}</strong></span>
-                    <Link to='/logout' title="Logout" className="log-btn">
+                    <Button onClick={props.onLogout} title='Logout' className='log-btn'>
                         <span className="material-symbols-outlined">logout</span>
-                    </Link>
+                    </Button>
                 </>
             ) : (
                 <>
                     <span className="me-2">Login</span>
                     <Button onClick={props.showLoginModal} title='Login' className='log-btn'>
-                        <i className="bi bi-person-circle"></i>
+                        <span class="material-symbols-outlined">account_circle</span>
                     </Button>                
                 </>
             )}

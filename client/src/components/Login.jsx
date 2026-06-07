@@ -27,20 +27,21 @@ function LoginModal(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        setUsername(username.trim())
-        const newUser = new User({ username: username, password: password })
+        const trimmedUsername = username.trim();
+        setUsername(trimmedUsername);
+        const newUser = new User({ username: trimmedUsername, password: password });
 
         try{
-            const user = await login(newUser)
-            props.doLogin(user)
+            const user = await login(newUser);
+            props.doLogin(user);
 
             props.handleClose();
             if(props.playAfterSubmit)
-                navigate('/game')
+                navigate('/game');
 
-            setError({})
+            setError({});
         } catch (ex){
-            setError(parseErrorMessage(ex.message))
+            setError(parseErrorMessage(ex.message));
         }
 
     }
@@ -75,17 +76,4 @@ function LoginModal(props) {
 }
 
 
-function Logout(props){
-    const navigate = useNavigate()
-    
-    useEffect( () => {
-        logout().then(() => {
-            props.doLogin(new User({}))
-            navigate('/')
-        })
-    })
-    return "Leaving the underground network..."
-}
-
-
-export { LoginModal, Logout }
+export { LoginModal }

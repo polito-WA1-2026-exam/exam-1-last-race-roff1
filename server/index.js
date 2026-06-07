@@ -66,9 +66,7 @@ app.use(session({
 app.use(passport.authenticate("session"));
 
 // validation functions
-const errorFormatter = ({ msg }) => {
-  return msg;
-};
+const errorFormatter = ({ msg }) => msg;
 
 const onValidationErrors = (validationResult, res, extraFields = {}) => {
   const errors = validationResult.formatWith(errorFormatter);
@@ -107,7 +105,7 @@ const routeValidation = [
 const userValidation = [
   check('username').trim().isString().notEmpty().withMessage("Username must be a non-empty string"),
   check('password').trim().isString().notEmpty().withMessage("Password must be a non-empty string")
-]
+];
 
 
 // publis APIs
@@ -141,22 +139,31 @@ app.get('/api/sessions/current', async (req, res) => {
 app.get('/api/ranking', async (req, res) => {
   getRanking()
     .then(ranking => res.json(ranking))
-    .catch(err => res.status(500).json(err))
+    .catch(err => res.status(500).json(err));
 })
 
 app.get('/api/network', async (req, res) => {
-  res.json(app.get('network'))
+  res.json(app.get('network'));
 })
 
 app.get('/api/games/current', async (req, res) => {
-  await closeExpiredGames(req.user.id);
+  try {
+    await closeExpiredGames(req.user.id);
+    const activeGame = await getActiveGame(req.user.id);
 
-  const activeGame = await getActiveGame(req.user.id);
+    if (!activeGame)
+      return res.json({ active: false });
 
-  if (!activeGame)
-    return res.json({ active: false });
-
-  res.json({ active: true, startStationId: activeGame.startStationId, destinationStationId: activeGame.destinationStationId, startTime: activeGame.startTime.format('YYYY-MM-DD HH:mm:ss') });
+    res.json({ 
+      active: true, 
+      startStationId: 
+      activeGame.startStationId, 
+      destinationStationId: activeGame.destinationStationId, 
+      startTime: dayjs(activeGame.startTime).format('YYYY-MM-DD HH:mm:ss') 
+    });
+  }catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 })
 
 app.post('/api/games', async (req, res) => {
@@ -168,15 +175,17 @@ app.post('/api/games', async (req, res) => {
     if (activeGame)
       return res.status(409).json({ error: 'An active game already exists.' });
 
-    const {
-      start: startStationId,
-      destination: destinationStationId
-    } = findRandomNodesAtMinDistance(req.app.get('graph'), 3);
+    const { start: startStationId, destination: destinationStationId } = findRandomNodesAtMinDistance(req.app.get('graph'), 3);
 
-    const newGame = new Game(null, req.user.id, startStationId, destinationStationId, dayjs().toISOString(), 'active')
+    const newGame = new Game(null, req.user.id, startStationId, destinationStationId, dayjs().toISOString(), 'active');
 
     const result = await createGame(newGame);
-    res.status(201).json({ active: true, startStationId: result.startStationId, destinationStationId: result.destinationStationId, startTime: result.startTime.format('YYYY-MM-DD HH:mm:ss') });
+    res.status(201).json({ 
+      active: true, 
+      startStationId: result.startStationId, 
+      destinationStationId: result.destinationStationId, 
+      startTime: dayjs(result.startTime).format('YYYY-MM-DD HH:mm:ss') 
+    });
 
   } catch (err) {
     return res.status(500).json({ err: err.message });
@@ -185,9 +194,8 @@ app.post('/api/games', async (req, res) => {
 })
 
 app.post('/api/games/route', routeValidation,  async (req, res) => {
-
   const invalidFields = validationResult(req);
-  const route = req.body.route
+  const route = req.body.route;
 
   const segments = req.app.get('network').segments;
   const segmentMap = new Map(segments.map(s => [s.id, s]));
@@ -197,10 +205,8 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
     const expiredCount = await closeExpiredGames(req.user.id);
     const game = await getActiveGame(req.user.id);
     if (!game){
-      if(expiredCount === 0)
-        return res.status(404).json({ error: "No active game found." });
-      else
-        return res.status(404).json({ error: "No active game found (it may be expired due to time limit: 90 seconds)." });
+      const msg = expiredCount === 0 ? "No active game found." : "No active game found, probably the session is expired.";
+      return res.status(404).json({ error: msg });
     }
 
     // validation errors + check start and destination stations + check path
@@ -208,11 +214,11 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
       await endGame(game.id, 0, 'invalid');
       return onValidationErrors(invalidFields, res, { events: [], score: 0, status: 'invalid' });
     }
-    const [firstSegmentStationIds, lastSegmentStationIds] = [segmentMap.get(route[0]).stationIds, segmentMap.get(route[route.length -1])]
-    if (!firstSegmentStationIds.includes(game.startStationId) || !lastSegmentStationIds.stationIds.includes(game.destinationStationId)) {
+    const [firstSegmentStationIds, lastSegmentStationIds] = [segmentMap.get(route[0]).stationIds, segmentMap.get(route[route.length -1]).stationIds];
+    if (!firstSegmentStationIds.includes(game.startStationId) || !lastSegmentStationIds.includes(game.destinationStationId)) {
       await endGame(game.id, 0, 'invalid');
       return res.status(422).json({ 
-        validationErrors: { route: "Route start and destination do not match the assigned game stations." },
+        validationErrors: { route: "Route start and/or destination do not match the assigned game stations." },
         events: [],
         score: 0,
         status: 'invalid'
@@ -235,10 +241,13 @@ app.post('/api/games/route', routeValidation,  async (req, res) => {
     const events = await getEvents();
     let score = 20;
     const appliedEvents = [];
-    for (let i = 0; i < route.length - 1; i++) {
+    for (let i = 0; i < route.length; i++) {
       const event = events[Math.floor(Math.random() * events.length)];
       score += event.effect;
-      appliedEvents.push({ description: event.description, effect: event.effect });
+      appliedEvents.push({ 
+        description: event.description, 
+        effect: event.effect 
+      });
     }
 
     const finalScore = Math.max(0, score);

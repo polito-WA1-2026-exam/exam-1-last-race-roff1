@@ -79,7 +79,7 @@ function PlanningPhase(props){
                 <ListGroup.Item>Stations may be visited more than once if necessary.</ListGroup.Item>
             </ListGroup>
             <p className="mt-4">When you are satisfied, submit your route before the timer expires.</p>
-            <img src="images/planning-screen.jpg" alt="Planning phase with timer and selected route screenshot"></img>       
+            <img src="images/planning-screen.png" alt="Planning phase with timer and selected route screenshot"></img>       
         </>
     )
 }
@@ -100,7 +100,7 @@ function ExecutionPhase(props){
 
             <p>The result of each event is displayed step by step together with your updated coin total.</p>
 
-            <img src="images/event-card-screen.jpg" alt="Event card and updated score screenshot"></img>
+            <img src="images/event-card-screen.png" alt="Event card and updated score screenshot"></img>
 
             <p>If your route is <strong>invalid or incomplete</strong>, the journey fails and your <span className="text-danger">final score becomes 0.</span></p>  
         </>
@@ -124,7 +124,7 @@ function RankingInstructions(props){
         <>
             <h3 className='section-title mt-4'>RANKING</h3>
             <p>Registered users compete in a global ranking. The leaderboard displays the <strong className="text-warning">best score achieved by each player</strong>. Challenge yourself and try to reach the top position.</p>
-            <img src="images/ranking-screen.jpg" alt="Ranking page screenshot"></img>
+            <img src="images/ranking-screen.png" alt="Ranking page screenshot"></img>
             <p className="lead-text mt-4">Good luck, and enjoy your Turin Underground!</p>          
         </>
     )

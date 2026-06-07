@@ -35,7 +35,7 @@ export const endGame = (id, score, status='completed') => {
 
 export const getActiveGame = (userId) => {
     return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM games WHERE userId = ? AND status = 'active' AND startTime > datetime('now', 'localtime', '-90 seconds') ORDER BY startTime DESC LIMIT 1`
+        const query = `SELECT * FROM games WHERE userId = ? AND status = 'active' AND startTime > datetime('now', 'localtime', '-95 seconds') ORDER BY startTime DESC LIMIT 1`
         db.get(query, [userId], (err, row) => {
             if(err)
                 reject(err)
@@ -52,7 +52,7 @@ export const getActiveGame = (userId) => {
 
 export const closeExpiredGames = (userId) => {
     return new Promise((resolve, reject) => {
-        const sql = `UPDATE games SET status = 'expired' WHERE status = 'active' AND startTime < datetime('now', 'localtime', '-90 seconds') AND userId = ?`
+        const sql = `UPDATE games SET status = 'expired' WHERE status = 'active' AND startTime < datetime('now', 'localtime', '-95 seconds') AND userId = ?`
         db.run(sql, [userId], function (err) {
             if(err) 
                 reject(err);
